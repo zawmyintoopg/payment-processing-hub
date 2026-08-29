@@ -2,12 +2,17 @@ package com.mybank.paymenthub.dto.response;
 
 import com.mybank.paymenthub.enums.MerchantOwnerType;
 import com.mybank.paymenthub.enums.MerchantStatus;
-import com.mybank.paymenthub.enums.Status;
 import lombok.*;
-
 import java.time.LocalDateTime;
-
-@AllArgsConstructor
+/**
+ * Response DTO for Merchant Owner APIs.
+ *
+ * This DTO is used to return merchant owner information
+ * from backend services to API clients.
+ *
+ * It separates API response data from the database entity
+ * to avoid exposing entity structure directly.
+ */
 @NoArgsConstructor
 @Getter
 @Setter

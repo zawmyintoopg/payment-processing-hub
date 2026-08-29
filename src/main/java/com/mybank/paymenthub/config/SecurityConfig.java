@@ -23,8 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-
-    private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
@@ -38,32 +36,26 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http
     ) throws Exception {
-
-
-     return    http
-                .csrf(csrf -> csrf.disable())
-
+     return http
+                .csrf(csrf -> csrf.disable()
+                )
 
                 .cors(cors ->
                         cors.configurationSource(corsConfigurationSource())
                 )
+             .authorizeHttpRequests(auth -> auth
 
+                     .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
 
-                .authorizeHttpRequests(auth -> auth
+                     .requestMatchers(
+                             "/api/v1/auth/**",
+                             "/swagger-ui/**",
+                             "/v3/api-docs/**",
+                             "/swagger-ui.html"
+                     ).permitAll()
 
-                        .requestMatchers(
-                                "/api/v1/auth/**",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-
-
-                        .anyRequest()
-                        .authenticated()
-
-                )
-
-
+                     .anyRequest().authenticated()
+             )
                 // IMPORTANT
                 .addFilterBefore(
                         jwtAuthenticationFilter,
@@ -71,9 +63,6 @@ public class SecurityConfig {
                 ).build();
 
     }
-
-
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
 
@@ -84,7 +73,7 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(
                 List.of(
-                        "http://localhost:5175"
+                        "http://localhost:5175","http://localhost:5173","http://localhost:5174"
                 )
         );
 

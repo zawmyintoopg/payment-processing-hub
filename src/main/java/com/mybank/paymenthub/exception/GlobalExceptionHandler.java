@@ -130,7 +130,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleException(
             Exception ex
     ) {
-
+        ex.printStackTrace();   // temporary
         log.error("Unexpected server error occurred", ex);
 
         return ResponseEntity
@@ -138,7 +138,23 @@ public class GlobalExceptionHandler {
                 .body(
                         ApiResponse.error(
                                 "5000",
-                                "Internal Server Error",
+                                ex.getMessage(), // temporary
+                                null
+                        )
+                );
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusiness(
+            BusinessException ex
+    ){
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(
+                        ApiResponse.error(
+                                "4002",
+                                ex.getMessage(),
                                 null
                         )
                 );

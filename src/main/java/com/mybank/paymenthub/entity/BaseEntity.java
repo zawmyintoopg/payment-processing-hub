@@ -6,7 +6,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-
 @MappedSuperclass
 @Getter
 @Setter
@@ -29,11 +28,11 @@ public abstract class BaseEntity {
     protected void onCreate(){
         createdDate = LocalDateTime.now();
         updatedDate = LocalDateTime.now();
-
     }
 
     @PreUpdate
     protected void onUpdate(){
+
         updatedDate = LocalDateTime.now();
     }
 

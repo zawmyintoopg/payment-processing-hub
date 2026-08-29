@@ -1,28 +1,36 @@
 package com.mybank.paymenthub.service;
 
 import com.mybank.paymenthub.dto.request.MerchantOutletRequestDTO;
+import com.mybank.paymenthub.dto.response.MerchantOutletMerchantHistoryResponseDTO;
 import com.mybank.paymenthub.dto.response.MerchantOutletResponseDTO;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+@Service
+@Transactional
 public interface MerchantOutletService {
 
-    //create merchant outlet
-    MerchantOutletResponseDTO createMerchantOutlet(MerchantOutletRequestDTO requestDTO);
-    // all merchant list
-    List<MerchantOutletResponseDTO> getAllMerchantOutletList();
-    // a merchant list
-   // MerchantOutletResponseDTO getMerchantById(Long id);
-    // update merchant outlet
-   // MerchantOutletRequestDTO updateMerchantOutlet(MerchantOutletRequestDTO requestDTO, Long id);
-    // delete merchant outlet
-   // void deleteMerchantOutlet(Long id);
-    //search by merchant outlet name
-   // MerchantOutletResponseDTO searchByOutletNumber(String outletNumber);
-    //search by merchant id
-   // MerchantOutletResponseDTO searchByMerchantId(String merchantId);
-    //search by merchant status
-    //MerchantOutletResponseDTO searchByMerchantStatus(String MerchantStatus);
+    MerchantOutletResponseDTO createMerchantOutlet(
+            MerchantOutletRequestDTO requestDTO);
+    MerchantOutletResponseDTO updateMerchantOutlet(
+            Long id,
+            MerchantOutletRequestDTO requestDTO
+    );
+    Page<MerchantOutletResponseDTO> getAllMerchantOutlets(
+            String search, //user search keyword  search ="Yangon"
+            Pageable pageable //pagination information
+    );
+    MerchantOutletResponseDTO getMerchantOutletById(
+            Long id
+    );
+    Page<MerchantOutletMerchantHistoryResponseDTO>
+    getMerchantHistory(
+            Long merchantOutletId,
+            Pageable pageable
+    );
+    void activateMerchantOutlet(Long id);
 
-
+    void deActivateMerchantOutlet(Long id);
 }

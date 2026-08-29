@@ -1,6 +1,4 @@
 package com.mybank.paymenthub.enums;
 
-public enum Currency {
-    MMK,
-    USD
+public class TerminalTypeStatus {
 }

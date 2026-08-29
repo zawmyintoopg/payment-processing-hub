@@ -1,34 +1,31 @@
 package com.mybank.paymenthub.dto.request;
 
-import com.mybank.paymenthub.enums.TerminalAssignmentAction;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
-@Getter
-@Setter
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
 public class TerminalAssignmentRequestDTO {
-    // Assignment Reference
-    private Long terminalAssignmentId;
 
-    // Terminal Information
+    @NotNull(
+            message = "Terminal Inventory is Required"
+    )
     private Long terminalInventoryId;
-    private String terminalNumber;
-    private String serialNumber;
 
-    //Outlet Information
+    @NotNull(
+            message = "Merchant Outlet is Required"
+    )
     private Long merchantOutletId;
-    private String merchantOutletName;
 
-    private LocalDate assignedDate;
-    private LocalDate returnedDate;
-    private TerminalAssignmentAction action;
+    @NotNull(
+            message = "Terminal Assignment Date is Required"
+    )
 
-    private String remarks;
+    private LocalDate terminalAssignmentDate;
+
+    private LocalDate terminalInstallationDate;
+
+    private LocalDate terminalActivationDate;
 
 }

@@ -1,27 +1,46 @@
 package com.mybank.paymenthub.dto.request;
 
-import com.mybank.paymenthub.enums.TerminalStatus;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 import java.time.LocalDate;
 
-public class TerminalInventoryRequestDTO {
-
-    @NotBlank(message = "Terminal Serial Number can not be blank")
+@Data
+@NoArgsConstructor
+public class TerminalInventoryRequestDTO{
+    @NotBlank(
+            message = "Terminal Serial Number is required"
+    )
+    @Size(max = 50, message = "Terminal Serial Number must not exceed 50 characters")
     private String terminalSerialNumber;
-    @NotBlank(message = "Manufacturer can not be blank")
+
+
+    @NotBlank(
+            message = "Manufacturer is required"
+    )
+    @Size(max = 50, message = "Manufacturer must not exceed 50 characters")
     private String manufacturer;
-    @NotBlank(message = "Model can not be blank")
+
+
+    @NotBlank(
+            message = "Model is required"
+    )
+    @Size(max = 50, message = "Model must not exceed 50 characters")
     private String model;
-    @NotNull(message = "Purchase Date can not be blank")
-    @Column(name = "purchased_date",nullable = false)
+
+
+    @NotNull(
+            message = "Purchase Date is required"
+    )
     private LocalDate purchasedDate;
-    @NotNull(message = "Terminal Type can not be blank")
+
+
+    @NotNull(
+            message = "Terminal Type is required"
+    )
     private Long terminalTypeId;
-    @NotBlank(message = "Terminal Status can not be blank")
-    private TerminalStatus status;
 
 }
 

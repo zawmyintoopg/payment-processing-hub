@@ -1,37 +1,98 @@
 package com.mybank.paymenthub.mapper;
 
+import com.mybank.paymenthub.dto.request.MerchantRequestDTO;
 import com.mybank.paymenthub.dto.response.MerchantResponseDTO;
 import com.mybank.paymenthub.entity.Merchant;
+import com.mybank.paymenthub.entity.MerchantCategory;
+import com.mybank.paymenthub.entity.MerchantOwner;
+import com.mybank.paymenthub.entity.MerchantSegment;
+import com.mybank.paymenthub.enums.MerchantStatus;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MerchantMapper {
+    public Merchant toEntity(MerchantRequestDTO requestDTO){
 
-    public MerchantResponseDTO toResponse(Merchant merchant){
-        MerchantResponseDTO merchantResponseDTO = new MerchantResponseDTO();
+        Merchant entity = new Merchant();
 
-        merchantResponseDTO.setId(merchant.getId());
-        merchantResponseDTO.setMerchantNumber(merchant.getMerchantNumber());
-        merchantResponseDTO.setMerchantName(merchant.getMerchantName());
-        merchantResponseDTO.setMerchantRegistrationNo(merchant.getMerchantRegistrationNo());
-        merchantResponseDTO.setBusinessRegistrationDate(merchant.getBusinessRegistrationDate());
+        entity.setMerchantName(requestDTO.getMerchantName());
+        entity.setBusinessRegistrationDate(requestDTO.getBusinessRegistrationDate());
+        entity.setStatus(MerchantStatus.ACTIVE);
+        return entity;
+    }
+    /**
+     * Converts a Merchant entity to MerchantResponseDTO
+     * @param entity Merchant entity
+     * @return MerchantResponseDTO
+     */
+    public MerchantResponseDTO toResponse(
+            Merchant entity
+    ){
 
-        if (merchant.getMerchantOwner() != null) {
-            merchantResponseDTO.setMerchantOwnerId(merchant.getMerchantOwner().getId());
+        MerchantResponseDTO responseDTO = new MerchantResponseDTO();
+
+        responseDTO.setId(
+                entity.getId()
+        );
+        responseDTO.setMerchantNumber(
+                entity.getMerchantNumber()
+        );
+        responseDTO.setMerchantName(
+                entity.getMerchantName()
+        );
+        responseDTO.setBusinessRegistrationDate(
+                entity.getBusinessRegistrationDate()
+        );
+        MerchantOwner owner = entity.getMerchantOwner();
+        if(owner != null){
+            responseDTO.setMerchantOwnerId(owner.getId());
+            responseDTO.setMerchantOwnerName(owner.getOwnerName());
         }
 
-        if (merchant.getMerchantSegment() != null) {
-            merchantResponseDTO.setMerchantSegmentId(merchant.getMerchantSegment().getId());
+        MerchantSegment segment = entity.getMerchantSegment();
+        if( segment != null) {
+            responseDTO.setMerchantSegmentId(segment.getId());
+            responseDTO.setMerchantSegmentName(segment.getMerchantSegmentName());
         }
 
-        if (merchant.getMerchantCategory() != null) {
-            merchantResponseDTO.setMerchantCategoryId(merchant.getMerchantCategory().getId());
+        MerchantCategory category = entity.getMerchantCategory();
+        if (category != null){
+            responseDTO.setMerchantCategoryId(category.getId());
+            responseDTO.setMerchantCategoryName(category.getCategoryName());
         }
+        responseDTO.setCreatedDate(
+                entity.getCreatedDate()
+        );
+        responseDTO.setUpdatedDate(
+                entity.getUpdatedDate()
+        );
+        responseDTO.setStatus(
+                entity.getStatus()
+        );
 
-        merchantResponseDTO.setStatus(merchant.getStatus());
-        merchantResponseDTO.setCreatedAt(merchant.getCreatedDate());
+        return responseDTO;
+    }
 
-        return merchantResponseDTO;
-
+    /**
+     * Updates an existing Merchant entity using requestDTO
+     * System-managed field such as merchantNumber is not modified.
+     *
+     * @param requestDTO request data
+     * @param entity existing Merchant entity
+     */
+    public void updateEntity(
+            MerchantRequestDTO requestDTO,
+            Merchant entity
+    ){
+        if (requestDTO.getMerchantName() != null){
+            entity.setMerchantName(
+                    requestDTO.getMerchantName()
+            );
+        }
+        if (requestDTO.getBusinessRegistrationDate() != null){
+            entity.setBusinessRegistrationDate(
+                    requestDTO.getBusinessRegistrationDate()
+            );
+        }
     }
 }

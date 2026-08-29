@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class SettlementDetail extends BaseEntity {
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="settlement_id",
             nullable=false)

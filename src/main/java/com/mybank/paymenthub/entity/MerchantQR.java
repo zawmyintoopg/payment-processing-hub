@@ -3,9 +3,17 @@ package com.mybank.paymenthub.entity;
 import com.mybank.paymenthub.enums.QRStatus;
 import com.mybank.paymenthub.enums.QRType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name="merchant_qrs")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class MerchantQR extends BaseEntity {
 
     @Column(name="qr_code", nullable=false, unique=true)

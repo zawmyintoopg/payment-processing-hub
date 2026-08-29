@@ -4,7 +4,6 @@ import com.mybank.paymenthub.dto.request.MerchantOwnerRequestDTO;
 import com.mybank.paymenthub.dto.response.MerchantOwnerResponseDTO;
 import com.mybank.paymenthub.entity.MerchantOwner;
 import com.mybank.paymenthub.enums.MerchantStatus;
-import com.mybank.paymenthub.enums.Status;
 import com.mybank.paymenthub.exception.DuplicateException;
 import com.mybank.paymenthub.exception.ResourceNotFoundException;
 import com.mybank.paymenthub.mapper.MerchantOwnerMapper;
@@ -16,8 +15,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-
+/**
+ * Service implementation for Merchant Owner management.
+ *
+ * Responsibilities:
+ * - Create merchant owners
+ * - Update merchant owner information
+ * - Retrieve merchant owner details
+ * - Manage merchant owner activation status
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -26,113 +32,144 @@ public class MerchantOwnerServiceImpl implements MerchantOwnerService {
     private final MerchantOwnerRepository merchantOwnerRepository;
     private final MerchantOwnerMapper merchantOwnerMapper;
     private final NumberSequenceService numberSequenceService;
-    private void validateDuplicate(MerchantOwnerRequestDTO requestDTO){
-
-        if(requestDTO.getRegistrationNo() != null &&
-                merchantOwnerRepository.existsByRegistrationNo(requestDTO.getRegistrationNo())){
-            throw new DuplicateException("Owner Registration No is Already Exist !");
-        }
-
-        if(requestDTO.getOwnerName() != null &&
-                merchantOwnerRepository.existsByOwnerName(requestDTO.getOwnerName())){
-            throw new DuplicateException("Owner Name Already Exist !");
-        }
-
-        if(requestDTO.getEmail() != null &&
-                merchantOwnerRepository.existsByEmail(requestDTO.getEmail())){
-            throw new DuplicateException("Email Already Exist !");
-        }
-
-    }
-
-    // CREATE MERCHANT OWNER
     @Override
-    public MerchantOwnerResponseDTO createMerchantOwner(MerchantOwnerRequestDTO requestDTO){
-
+    public MerchantOwnerResponseDTO createMerchantOwner(
+            MerchantOwnerRequestDTO requestDTO
+    ){
         validateDuplicate(requestDTO);
-        MerchantOwner merchantOwner = new MerchantOwner();
-        String getOwnerNumber =
+        MerchantOwner merchantOwner =
+                merchantOwnerMapper.toEntity(requestDTO);
+        String ownerNumber =
                 numberSequenceService.generateOwnerNumber();
-
-        merchantOwner.setOwnerNumber(getOwnerNumber);
-        merchantOwner.setOwnerName(requestDTO.getOwnerName());
-        merchantOwner.setRegistrationNo(requestDTO.getRegistrationNo());
-        merchantOwner.setOwnerType(requestDTO.getOwnerType());
-        merchantOwner.setPhone(requestDTO.getPhone());
-        merchantOwner.setEmail(requestDTO.getEmail());
-        MerchantOwner savedMerchantOwner =  merchantOwnerRepository.save(merchantOwner);
+        merchantOwner.setOwnerNumber(ownerNumber);
+        merchantOwner.setStatus(MerchantStatus.ACTIVE);
+        MerchantOwner savedMerchantOwner =
+                merchantOwnerRepository.save(merchantOwner);
 
         return merchantOwnerMapper.toResponse(savedMerchantOwner);
     }
-
-    // UPDATE MERCHANT OWNER
     @Override
-    public MerchantOwnerResponseDTO updateMerchantOwner(Long id , MerchantOwnerRequestDTO requestDTO){
-        //search id update merchants
-        MerchantOwner merchantOwner = merchantOwnerRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("ID NOT FOUND","id",id));
+    public MerchantOwnerResponseDTO updateMerchantOwner(
+            Long id,
+            MerchantOwnerRequestDTO requestDTO
+    ){
 
-        if(requestDTO.getOwnerName() != null &&
-                merchantOwnerRepository.existsByOwnerNameAndIdNot(requestDTO.getOwnerName(),id)){
-            throw new DuplicateException("Owner Name is Already Exist ! in "+id);
-        }
+        MerchantOwner merchantOwner = findMerchantOwnerById(id);
 
-        if(requestDTO.getRegistrationNo() != null &&
-                merchantOwnerRepository.existsByRegistrationNoAndIdNot(requestDTO.getRegistrationNo(),id)){
-            throw new DuplicateException("Registration Number is Already Exist !");
-        }
+        checkDuplicateForUpdate(id, requestDTO);
 
-        if(requestDTO.getEmail() != null &&
-                merchantOwnerRepository.existsByEmailAndIdNot(requestDTO.getEmail(),id)){
-            throw new DuplicateException("Email Already Exist !");
-        }
+        merchantOwnerMapper.updateEntity(
+                requestDTO,merchantOwner
+        );
 
-        merchantOwner.setOwnerName(requestDTO.getOwnerName());
-        merchantOwner.setOwnerType(requestDTO.getOwnerType());
-        merchantOwner.setRegistrationNo(requestDTO.getRegistrationNo());
-        merchantOwner.setPhone(requestDTO.getPhone());
-        merchantOwner.setEmail(requestDTO.getEmail());
-        merchantOwner.setStatus(requestDTO.getStatus());
+        MerchantOwner updatedMerchantOwner =
+                merchantOwnerRepository.save(merchantOwner);
 
-        MerchantOwner updatedMerchantOwner = merchantOwnerRepository.save(merchantOwner);
         return merchantOwnerMapper.toResponse(updatedMerchantOwner);
     }
-    //GET ALL MERCHANTS
-  /*  @Override
-    public Page<MerchantOwnerResponseDTO> getAllMerchantOwners(Pageable pageable){
-        // Get Merchant List from Table
-        Page<MerchantOwner> merchantOwners =
-                merchantOwnerRepository.findAll(pageable);
-
-        return merchantOwners.
-                map(merchantOwnerMapper::toResponse);
-    } */
     @Override
-    public Page<MerchantOwnerResponseDTO> getAllMerchantOwners(Pageable pageable) {
+    public Page<MerchantOwnerResponseDTO> getAllMerchantOwners(
+            String search,
+            Pageable pageable
+    ) {
 
-        System.out.println("Before findAll");
+        Page<MerchantOwner> merchantOwners;
 
-        Page<MerchantOwner> merchantOwners = merchantOwnerRepository.findAll(pageable);
+        if(search == null || search.isBlank()){
+            merchantOwners = merchantOwnerRepository.findAll(pageable);
+        }
+        else{
+            merchantOwners   = merchantOwnerRepository
+                    .searchMerchantOwners(search,pageable);
+        }
 
-        System.out.println("After findAll: " + merchantOwners.getTotalElements());
-
-        return merchantOwners.map(merchantOwnerMapper::toResponse);
+        return merchantOwners.map(
+                merchantOwnerMapper::toResponse
+        );
     }
     @Override
     public MerchantOwnerResponseDTO getMerchantOwnerById(Long id){
-       // Get Merchant From Table
-       MerchantOwner merchantOwner = merchantOwnerRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Id Not Found","id",id));
-       // response merchant owner
+       MerchantOwner merchantOwner = findMerchantOwnerById(id);
+
        return merchantOwnerMapper.toResponse(merchantOwner);
     }
-
+    @Override
+    public void activateMerchantOwner(Long id){
+        MerchantOwner merchantOwner = findMerchantOwnerById(id);
+        merchantOwner.setStatus(MerchantStatus.ACTIVE);
+        merchantOwnerRepository.save(merchantOwner);
+    }
     @Override
     public void deactivateMerchantOwner(Long id){
-        MerchantOwner merchant = merchantOwnerRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("ID NOT FOUND","id",id));
-        merchant.setStatus(MerchantStatus.INACTIVE);
-        merchantOwnerRepository.save(merchant);
+        MerchantOwner merchantOwner = findMerchantOwnerById(id);
+        merchantOwner.setStatus(MerchantStatus.INACTIVE);
+        merchantOwnerRepository.save(merchantOwner);
     }
+    private void validateDuplicate(MerchantOwnerRequestDTO requestDTO) {
 
+        if (requestDTO.getRegistrationNo() != null &&
+                merchantOwnerRepository.existsByRegistrationNo(
+                        requestDTO.getRegistrationNo())
+        ) {
+            throw new DuplicateException("Owner Registration number already exist !");
+        }
 
-    public static class CustomUserService {
+        if (requestDTO.getOwnerName() != null &&
+                merchantOwnerRepository.existsByOwnerName(requestDTO.getOwnerName())) {
+            throw new DuplicateException("Owner Name Already Exist !");
+        }
+
+        if (requestDTO.getEmail() != null &&
+                merchantOwnerRepository.existsByEmail(requestDTO.getEmail())) {
+            throw new DuplicateException("Email Already Exist !");
+        }
+    }
+    private MerchantOwner findMerchantOwnerById(Long id){
+
+        return merchantOwnerRepository.findById(id).
+        orElseThrow(() -> new ResourceNotFoundException(
+                        "MerchantOwner Not Found",
+                        "id",
+                        id
+                )
+        );
+    }
+    private void checkDuplicateForUpdate(
+            Long id,
+            MerchantOwnerRequestDTO requestDTO
+    ){
+
+        if(requestDTO.getRegistrationNo() != null &&
+                merchantOwnerRepository.existsByRegistrationNoAndIdNot(
+                        requestDTO.getRegistrationNo(),
+                        id
+                )
+        ){
+            throw new DuplicateException(
+                    "Owner Registration Number Already Exist!"
+            );
+        }
+
+        if(requestDTO.getOwnerName() != null &&
+                merchantOwnerRepository.existsByOwnerNameAndIdNot(
+                        requestDTO.getOwnerName(),
+                        id
+                )
+        ){
+            throw new DuplicateException(
+                    "Owner Name Already Exist!"
+            );
+        }
+
+        if(requestDTO.getEmail() != null &&
+                merchantOwnerRepository.existsByEmailAndIdNot(
+                        requestDTO.getEmail(),
+                        id
+                )
+        ){
+            throw new DuplicateException(
+                    "Email Already Exist!"
+            );
+        }
     }
 }

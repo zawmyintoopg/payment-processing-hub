@@ -1,27 +1,43 @@
 package com.mybank.paymenthub.entity;
 
 import com.mybank.paymenthub.enums.Status;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+
 @Entity
-@Table(name = "terminal_types")
+@Table(
+        name = "terminal_types",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_terminal_type_code_name",
+                        columnNames = {"type_code", "type_name"}
+                )
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TerminalType extends BaseEntity{
-    @Column(name="type_code",nullable = false,unique = true)
+public class TerminalType extends BaseEntity {
+
+    @Column(
+            name = "type_code",
+            nullable = false,
+            length = 30
+    )
     private String typeCode;
 
-    @Column(name="type_name",nullable = false,unique = true)
+    @Column(
+            name = "type_name",
+            nullable = false,
+            length = 100
+    )
     private String typeName;
 
-    @Column(name="status",nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(
+            name = "status",
+            nullable = false
+    )
     private Status status;
-
 }

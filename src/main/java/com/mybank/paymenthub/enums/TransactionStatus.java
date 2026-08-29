@@ -9,11 +9,9 @@ public enum TransactionStatus {
     SUCCESS,
 
     FAILED,
-
-    VOIDED,
-
-    REVERSED,
-
-    REFUNDED
+    CANCELLED,
+    PENDING,
+    REVERSAL_PENDING,
+    REVERSED
 
 }

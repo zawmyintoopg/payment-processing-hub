@@ -1,7 +1,6 @@
 package com.mybank.paymenthub.service;
 
 import com.mybank.paymenthub.entity.NumberSequence;
-import com.mybank.paymenthub.exception.ResourceNotFoundException;
 import com.mybank.paymenthub.repository.NumberSequenceRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +25,36 @@ public class NumberSequenceService {
     public String generateTerminalNumber(){
         return generateNumber("TERMINAL");
     }
+
+    public String generateContractNumber(){
+        return generateNumber("CONTRACT");
+    }
+
+    public String generateTerminalAssignmentNumber(){
+        return generateNumber("TERMINAL_ASSIGNMENT");
+    }
+
+    public String generateTransactionRef(){
+        return generateNumber("TRANSACTION_REF");
+    }
+
+    public String generateTransactionNumber(){
+        return generateNumber("TRANSACTION_NUMBER");
+    }
+
+    public String generateSettlementNumber(){
+        return generateNumber("SETTLEMENT_NUMBER");
+    }
+
+
     @Transactional
     public String generateNumber(String sequenceName){
 
         NumberSequence numberSequence =
                 numberSequenceRepository.findForUpdate(sequenceName);
+
         Long nextNumber = numberSequence.getCurrentValue() + 1;
+
         numberSequence.setCurrentValue(nextNumber);
         numberSequenceRepository.save(numberSequence);
 
